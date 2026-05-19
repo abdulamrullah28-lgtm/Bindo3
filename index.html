@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Kosakata Bahasa Indonesia</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Google: Poppins & Fredoka One untuk kesan ramah anak -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#bbf7d0 1.5px, transparent 1.5px), radial-gradient(#bbf7d0 1.5px, #f0fdf4 1.5px);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            overflow-x: hidden;
+        }
+        .font-kids {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .bouncing-slow {
+            animation: bounce 3s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #certificate-print-area, #certificate-print-area * {
+                visibility: visible;
+            }
+            #certificate-print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 md:p-6 select-none">
+
+    <!-- Efek Suara (Web Audio API Synthesizer) -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(freq, type, duration, delay = 0) {
+            setTimeout(() => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            }, delay * 1000);
+        }
+
+        const soundClick = () => {
+            playTone(600, 'sine', 0.1);
+        };
+
+        const soundCorrect = () => {
+            playTone(523.25, 'triangle', 0.15); // C5
+            playTone(659.25, 'triangle', 0.15, 0.1); // E5
+            playTone(783.99, 'triangle', 0.3, 0.2); // G5
+        };
+
+        const soundIncorrect = () => {
+            playTone(220, 'sawtooth', 0.2); // A3
+            playTone(147, 'sawtooth', 0.4, 0.15); // D3
+        };
+
+        const soundVictory = () => {
+            const melody = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50];
+            melody.forEach((freq, idx) => {
+                playTone(freq, 'sine', 0.25, idx * 0.12);
+            });
+        };
+    </script>
+
+    <!-- Header / Logo Area -->
+    <header class="w-full max-w-4xl text-center mb-4 transition-all duration-500">
+        <div class="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm border-4 border-amber-400 rounded-full px-6 py-2 shadow-md">
+            <span class="text-3xl">🎒</span>
+            <h1 class="font-kids text-xl md:text-2xl font-bold text-amber-600 tracking-wide">Petualangan Kosakata</h1>
+            <span class="text-3xl">📖</span>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-4xl bg-white/95 rounded-3xl border-8 border-sky-400 shadow-2xl p-6 flex-grow flex flex-col justify-between relative overflow-hidden">
+        <!-- Background Ornaments -->
+        <div class="absolute -top-10 -left-10 text-8xl opacity-10 pointer-events-none select-none font-kids">A</div>
+        <div class="absolute -bottom-10 -right-10 text-8xl opacity-10 pointer-events-none select-none font-kids">Z</div>
+        <div class="absolute top-1/2 right-4 text-6xl opacity-10 pointer-events-none select-none">✏️</div>
+        <div class="absolute top-1/3 left-4 text-6xl opacity-10 pointer-events-none select-none">🎨</div>
+
+        <!-- 1. START SCREEN -->
+        <div id="screen-start" class="flex flex-col items-center justify-center text-center space-y-6 py-4">
+            <div class="space-y-2">
+                <span class="text-6xl bouncing-slow inline-block">🚀</span>
+                <h2 class="font-kids text-3xl md:text-5xl text-sky-600 font-bold drop-shadow-sm">Ayo Mulai Belajar!</h2>
+                <p class="text-sm md:text-base text-gray-500 max-w-md mx-auto">Selamat datang di petualangan seru mengenal Sinonim, Antonim, dan Makna Kata Denotatif.</p>
+            </div>
+
+            <!-- Form Identitas -->
+            <form id="form-identity" class="w-full max-w-sm bg-amber-50/50 p-6 rounded-2xl border-2 border-amber-200 space-y-4">
+                <h3 class="font-kids text-amber-700 font-bold text-lg">📝 Isi Identitasmu:</h3>
+                <div>
+                    <label class="block text-left text-xs font-bold text-gray-600 mb-1">NAMA LENGKAP</label>
+                    <input type="text" id="player-name" required placeholder="Contoh: Budi Santoso" class="w-full px-4 py-2 rounded-xl border-2 border-amber-300 focus:outline-none focus:border-amber-500 text-center font-semibold text-gray-700">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-left text-xs font-bold text-gray-600 mb-1">KELAS</label>
+                        <select id="player-class" class="w-full px-3 py-2 rounded-xl border-2 border-amber-300 focus:outline-none focus:border-amber-500 text-center font-semibold text-gray-700 bg-white">
+                            <option value="3">Kelas 3 SD</option>
+                            <option value="4" selected>Kelas 4 SD</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-left text-xs font-bold text-gray-600 mb-1">SEKOLAH</label>
+                        <input type="text" id="player-school" required placeholder="SDN Cerdas" class="w-full px-3 py-2 rounded-xl border-2 border-amber-300 focus:outline-none focus:border-amber-500 text-center font-semibold text-gray-700">
+                    </div>
+                </div>
+            </form>
+
+            <div class="flex flex-col sm:flex-row gap-3 w-full justify-center max-w-md">
+                <button onclick="showInstructions()" type="button" class="w-full sm:w-auto bg-sky-100 hover:bg-sky-200 text-sky-700 font-kids font-bold px-6 py-3 rounded-2xl border-b-4 border-sky-300 transition active:translate-y-1">
+                    📖 Petunjuk
+                </button>
+                <button onclick="startGame()" type="button" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-kids font-bold px-10 py-3 rounded-2xl border-b-4 border-emerald-700 transition active:translate-y-1 flex items-center justify-center gap-2">
+                    🎮 Mulai Bermain!
+                </button>
+            </div>
+            <button onclick="exitApp()" type="button" class="text-xs text-rose-500 hover:underline">Keluar Game</button>
+        </div>
+
+        <!-- 2. INSTRUCTIONS SCREEN -->
+        <div id="screen-instructions" class="hidden flex flex-col space-y-4 py-2">
+            <h3 class="font-kids text-2xl md:text-3xl text-sky-600 text-center font-bold">📖 Panduan Petualangan</h3>
+            
+            <div class="grid md:grid-cols-3 gap-4 text-sm text-gray-700">
+                <div class="bg-violet-50 p-4 rounded-xl border-2 border-violet-200">
+                    <span class="text-3xl block mb-2">❓</span>
+                    <h4 class="font-bold text-violet-700 font-kids">1. Pilihan Ganda</h4>
+                    <p class="text-xs mt-1">Jawablah 10 pertanyaan tentang antonim, sinonim, dan denotasi. Setiap jawaban benar memberimu <span class="font-bold text-emerald-600">10 poin</span>!</p>
+                </div>
+                <div class="bg-amber-50 p-4 rounded-xl border-2 border-amber-200">
+                    <span class="text-3xl block mb-2">🔗</span>
+                    <h4 class="font-bold text-amber-700 font-kids">2. Menjodohkan</h4>
+                    <p class="text-xs mt-1">Klik sebuah kata di kolom kiri, lalu klik pasangannya yang tepat di kolom kanan. Jodohkan 10 kata yang serasi!</p>
+                </div>
+                <div class="bg-emerald-50 p-4 rounded-xl border-2 border-emerald-200">
+                    <span class="text-3xl block mb-2">🃏</span>
+                    <h4 class="font-bold text-emerald-700 font-kids">3. Kartu Memori</h4>
+                    <p class="text-xs mt-1">Buka kartu-kartu yang tertutup dan carilah pasangan kata yang memiliki arti sejenis, berlawanan, atau artinya pas!</p>
+                </div>
+            </div>
+
+            <div class="bg-sky-50 p-3 rounded-xl text-center text-xs text-sky-800 border border-sky-200">
+                ⏳ Hati-hati! Setiap tantangan memiliki batas waktu yang menegangkan. Kumpulkan poin sebanyak mungkin untuk mendapatkan <strong>Badge Hebat</strong>!
+            </div>
+
+            <div class="text-center">
+                <button onclick="backToMenu()" class="bg-sky-500 hover:bg-sky-600 text-white font-kids font-bold px-8 py-2 rounded-xl transition active:translate-y-0.5">
+                    Saya Mengerti, Kembali!
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. GAMEPLAY CORE INTERFACES -->
+        <div id="screen-gameplay" class="hidden flex-col flex-grow justify-between space-y-4">
+            <!-- Game HUD / Status -->
+            <div class="flex flex-wrap justify-between items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs md:text-sm font-semibold text-gray-600">
+                <div class="flex items-center gap-1">
+                    <span>👤</span> <span id="hud-name" class="text-sky-600 font-bold">Nama</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-bold">Skor: <span id="hud-score">0</span></span>
+                    <span id="hud-timer-container" class="bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-bold">⏱️ <span id="hud-timer">30s</span></span>
+                </div>
+            </div>
+
+            <!-- Level / Progress Indicator -->
+            <div class="space-y-1">
+                <div class="flex justify-between text-xs font-bold text-sky-700">
+                    <span id="game-mode-title">Tantangan: Pilihan Ganda</span>
+                    <span id="game-progress-text">Soal 1/10</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+                    <div id="game-progress-bar" class="bg-sky-500 h-full transition-all duration-300" style="width: 10%;"></div>
+                </div>
+            </div>
+
+            <!-- STAGE 1: MULTIPLE CHOICE -->
+            <div id="stage-mc" class="hidden flex-col flex-grow justify-center space-y-4 py-2">
+                <div class="bg-sky-50 border-2 border-sky-200 p-4 rounded-2xl min-h-[80px] flex items-center justify-center text-center">
+                    <h3 id="mc-question" class="font-kids text-base md:text-xl text-sky-900 font-semibold">Memuat soal...</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="mc-options">
+                    <!-- Dynamic MC Buttons -->
+                </div>
+            </div>
+
+            <!-- STAGE 2: MATCHING (MENJODOHKAN) -->
+            <div id="stage-matching" class="hidden flex-col flex-grow justify-center space-y-4 py-2">
+                <div class="text-center text-xs md:text-sm text-amber-700 bg-amber-50 p-2 rounded-xl border border-amber-200 mb-2">
+                    👉 <strong>Cara Main:</strong> Klik satu kata di kolom kiri, lalu klik pasangannya yang tepat di kolom kanan!
+                </div>
+                <div class="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
+                    <!-- Left Column -->
+                    <div class="space-y-2 flex flex-col justify-between" id="match-left">
+                        <!-- Left cards -->
+                    </div>
+                    <!-- Right Column -->
+                    <div class="space-y-2 flex flex-col justify-between" id="match-right">
+                        <!-- Right cards -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 3: MEMORY CARDS -->
+            <div id="stage-memory" class="hidden flex-col flex-grow justify-center space-y-4 py-2">
+                <div class="text-center text-xs text-violet-700 bg-violet-50 p-2 rounded-xl border border-violet-200">
+                    🃏 Carilah pasangan kata yang bermakna sama (sinonim), berlawanan (antonim), atau denotasi yang sesuai!
+                </div>
+                <div class="grid grid-cols-5 gap-2 max-w-lg mx-auto" id="memory-grid">
+                    <!-- 10 Memory Cards (5 Pairs) -->
+                </div>
+            </div>
+
+            <!-- Feedback Overlay / Notification Area (No Alerts allowed) -->
+            <div id="game-feedback" class="hidden absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-20 transition-all duration-300">
+                <div class="text-center space-y-2 p-6 rounded-2xl max-w-sm">
+                    <div id="feedback-emoji" class="text-7xl bouncing-slow">🎉</div>
+                    <h4 id="feedback-title" class="font-kids text-2xl font-bold">Keren Banget!</h4>
+                    <p id="feedback-desc" class="text-sm text-gray-600">Kamu berhasil menjawab dengan benar.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. END GAME SCREEN -->
+        <div id="screen-end" class="hidden flex-col items-center text-center space-y-6 py-4">
+            <div class="space-y-2">
+                <span class="text-6xl">🏆</span>
+                <h2 class="font-kids text-3xl md:text-4xl text-emerald-600 font-bold">Petualangan Selesai!</h2>
+                <p class="text-sm text-gray-500">Hebat sekali, kamu telah menyelesaikan semua tantangan!</p>
+            </div>
+
+            <!-- Hasil Card -->
+            <div class="w-full max-w-md bg-sky-50 border-4 border-sky-200 rounded-3xl p-6 space-y-4 shadow-md">
+                <h3 class="font-kids text-sky-800 text-lg font-bold border-b-2 border-sky-100 pb-2">Rangkuman Hasil Belajar</h3>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-white p-2 rounded-xl">
+                        <span class="text-2xl block">🌟</span>
+                        <span class="text-xs text-gray-500 block">Total Skor</span>
+                        <span id="end-score" class="text-xl font-bold text-sky-600">0</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl">
+                        <span class="text-2xl block">✅</span>
+                        <span class="text-xs text-gray-500 block">Benar</span>
+                        <span id="end-correct" class="text-xl font-bold text-emerald-600">0</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-xl">
+                        <span class="text-2xl block">❌</span>
+                        <span class="text-xs text-gray-500 block">Salah</span>
+                        <span id="end-incorrect" class="text-xl font-bold text-rose-500">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 p-3 rounded-xl border border-sky-100">
+                    <span class="text-xs font-bold text-gray-500 uppercase block tracking-wider">PREDIKAT</span>
+                    <span id="end-predicate" class="font-kids text-2xl text-amber-600 font-bold">HEBAT</span>
+                </div>
+
+                <div class="text-xs text-gray-600 space-y-1">
+                    <p>Nama: <span id="end-name" class="font-bold">Nama</span></p>
+                    <p>Kelas: Kelas <span id="end-class" class="font-bold">4</span> | Sekolah: <span id="end-school" class="font-bold">Sekolah</span></p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full justify-center max-w-md">
+                <button onclick="restartGame()" class="bg-sky-500 hover:bg-sky-600 text-white font-kids font-bold px-6 py-3 rounded-2xl border-b-4 border-sky-700 transition active:translate-y-1">
+                    🔄 Main Lagi
+                </button>
+                <button onclick="printCertificate()" class="bg-amber-500 hover:bg-amber-600 text-white font-kids font-bold px-6 py-3 rounded-2xl border-b-4 border-amber-700 transition active:translate-y-1 flex items-center justify-center gap-2">
+                    🖨️ Cetak Sertifikat
+                </button>
+            </div>
+            <button onclick="exitApp()" class="text-xs text-rose-500 hover:underline">Keluar Game</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center mt-4 text-xs text-gray-500 font-medium">
+        Bahasa Indonesia Kelas 3 & 4 SD • Edukasi Kosakata Menyenangkan © 2026
+    </footer>
+
+    <!-- HIDDEN CERTIFICATE PRINT AREA -->
+    <div id="certificate-print-area" class="hidden my-8 p-10 max-w-4xl mx-auto border-8 border-amber-400 bg-amber-50 rounded-lg shadow-lg relative text-center">
+        <!-- Certificate Frame Corners -->
+        <div class="absolute top-4 left-4 text-3xl">🌸</div>
+        <div class="absolute top-4 right-4 text-3xl">🌸</div>
+        <div class="absolute bottom-4 left-4 text-3xl">🌸</div>
+        <div class="absolute bottom-4 right-4 text-3xl">🌸</div>
+
+        <div class="space-y-6">
+            <div class="text-center space-y-1">
+                <span class="text-5xl block">🏆</span>
+                <h1 class="font-kids text-3xl md:text-4xl text-amber-600 font-bold tracking-wide">SERTIFIKAT PENGHARGAAN</h1>
+                <p class="text-sm font-semibold text-gray-600 tracking-widest uppercase">Petualangan Kosakata Bahasa Indonesia</p>
+            </div>
+
+            <div class="h-1 bg-amber-300 my-4 max-w-md mx-auto"></div>
+
+            <p class="text-gray-600 italic">Sertifikat ini diberikan dengan bangga kepada:</p>
+            <h2 id="cert-name" class="font-kids text-2xl md:text-3xl text-sky-700 font-bold border-b-2 border-dashed border-sky-200 inline-block px-10 py-1">Nama Siswa</h2>
+            
+            <p class="text-sm text-gray-600 max-w-md mx-auto">
+                Siswa <strong id="cert-class">Kelas 4</strong> dari <strong id="cert-school">Sekolah Dasar</strong> yang telah berhasil menyelesaikan tantangan materi <strong>Sinonim, Antonim, dan Makna Kata Denotatif</strong> dengan hasil yang luar biasa!
+            </p>
+
+            <div class="grid grid-cols-3 gap-4 max-w-md mx-auto py-2 bg-white rounded-xl border-2 border-amber-200">
+                <div>
+                    <span class="text-xs text-gray-500 block">Total Skor</span>
+                    <span id="cert-score" class="text-lg font-bold text-amber-600">0</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 block">Predikat</span>
+                    <span id="cert-predicate" class="text-lg font-bold text-emerald-600">Hebat</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 block">Status</span>
+                    <span class="text-lg font-bold text-sky-600">Lulus ✅</span>
+                </div>
+            </div>
+
+            <div class="flex justify-around items-end pt-10 text-xs text-gray-500">
+                <div class="text-center space-y-8">
+                    <p class="border-t border-gray-400 pt-1 w-36 mx-auto">Guru Kelas</p>
+                </div>
+                <div class="text-center space-y-8">
+                    <p class="border-t border-gray-400 pt-1 w-36 mx-auto">Kepala Sekolah</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- GAME SCRIPT -->
+    <script>
+        // --- GAME DATA CONFIGURATION ---
+        const MC_QUESTIONS = [
+            { q: "Apa antonim dari kata 'cepat'?", a: "lambat", opt: ["lambat", "laju", "deras", "segera"] },
+            { q: "Pilihlah sinonim dari kata 'pandai'!", a: "pintar", opt: ["bodoh", "pintar", "lambat", "malas"] },
+            { q: "Kalimat: 'Ayah mengecat meja hijau di taman.' Apa makna denotatif kata 'meja hijau'?", a: "meja yang berwarna hijau", opt: ["meja yang berwarna hijau", "pengadilan", "meja rapat", "kantor polisi"] },
+            { q: "Apa antonim dari kata 'tinggi'?", a: "rendah", opt: ["pendek", "panjang", "rendah", "kecil"] },
+            { q: "Pilihlah sinonim dari kata 'luas'?", a: "lebar", opt: ["sempit", "lebar", "tinggi", "dalam"] },
+            { q: "Kalimat: 'Daun kering gugur ditiup angin.' Apa makna denotatif kata 'gugur'?", a: "jatuh dari tangkainya", opt: ["menang lomba", "jatuh dari tangkainya", "mati di medan perang", "tumbuh tunas baru"] },
+            { q: "Apa antonim dari kata 'panas'?", a: "dingin", opt: ["hangat", "dingin", "sejuk", "mendung"] },
+            { q: "Pilihlah sinonim dari kata 'gembira'!", a: "senang", opt: ["sedih", "marah", "takut", "senang"] },
+            { q: "Kalimat: 'Tangan adik panjang sekali.' Apa makna denotatif dari 'panjang tangan'?", a: "tangan yang berukuran panjang", opt: ["suka mencuri", "tangan yang berukuran panjang", "tangan palsu", "suka menolong"] },
+            { q: "Apa antonim dari kata 'tebal'?", a: "tipis", opt: ["lebar", "tipis", "berat", "halus"] }
+        ];
+
+        // 10 Pairs for Matching Game (split into 2 rounds of 5 for optimal space on screen)
+        const MATCH_DATA = [
+            // Round 1
+            [
+                { left: "Besar", right: "Kecil", type: "Antonim" },
+                { left: "Baju", right: "Pakaian", type: "Sinonim" },
+                { left: "Harum", right: "Wangi", type: "Sinonim" },
+                { left: "Gelap", right: "Terang", type: "Antonim" },
+                { left: "Kurus", right: "Gemuk", type: "Antonim" }
+            ],
+            // Round 2
+            [
+                { left: "Membeli", right: "Menjual", type: "Antonim" },
+                { left: "Indah", right: "Elok", type: "Sinonim" },
+                { left: "Melihat", right: "Menonton", type: "Sinonim" },
+                { left: "Haus", right: "Butuh Minum", type: "Arti" },
+                { left: "Lapar", right: "Butuh Makan", type: "Arti" }
+            ]
+        ];
+
+        // Memory game data (5 pairs = 10 cards)
+        const MEMORY_DATA = [
+            { text: "Sedih", matchId: 1 },
+            { text: "Duka", matchId: 1 }, // Sinonim
+            { text: "Rajin", matchId: 2 },
+            { text: "Malas", matchId: 2 }, // Antonim
+            { text: "Mentari", matchId: 3 },
+            { text: "Matahari", matchId: 3 }, // Sinonim
+            { text: "Pahit", matchId: 4 },
+            { text: "Manis", matchId: 4 }, // Antonim
+            { text: "Gugur", matchId: 5 },
+            { text: "Runtuh", matchId: 5 } // Sinonim
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let player = { name: "", class: "4", school: "" };
+        let activeScreen = "start";
+        let score = 0;
+        let timerVal = 0;
+        let timerInterval = null;
+        
+        let currentStage = 1; // 1: MC, 2: Matching, 3: Memory
+        let currentMcIndex = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+
+        // Matching State
+        let selectedLeft = null;
+        let selectedRight = null;
+        let matchedPairs = [];
+        let matchingRound = 0;
+
+        // Memory Game State
+        let flippedCards = [];
+        let matchedMemoryIds = [];
+
+        // --- SCREEN ROUTING ---
+        function setScreen(screenId) {
+            document.getElementById("screen-start").classList.add("hidden");
+            document.getElementById("screen-instructions").classList.add("hidden");
+            document.getElementById("screen-gameplay").classList.add("hidden");
+            document.getElementById("screen-end").classList.add("hidden");
+
+            document.getElementById(`screen-${screenId}`).classList.remove("hidden");
+            activeScreen = screenId;
+        }
+
+        function showInstructions() {
+            soundClick();
+            setScreen("instructions");
+        }
+
+        function backToMenu() {
+            soundClick();
+            setScreen("start");
+        }
+
+        function exitApp() {
+            soundClick();
+            if (confirm("Apakah kamu yakin ingin keluar dari petualangan?")) {
+                window.close();
+                // Fallback jika window.close() dicegah browser
+                alert("Petualangan ditutup. Sampai jumpa lagi!");
+            }
+        }
+
+        // --- GAMEPLAY ENGINE ---
+        function startGame() {
+            soundClick();
+            const nameInput = document.getElementById("player-name").value.trim();
+            const schoolInput = document.getElementById("player-school").value.trim();
+            const classSelect = document.getElementById("player-class").value;
+
+            if (!nameInput || !schoolInput) {
+                alert("Harap isi semua kolom identitas terlebih dahulu ya!");
+                return;
+            }
+
+            player = { name: nameInput, class: classSelect, school: schoolInput };
+            
+            // HUD Init
+            document.getElementById("hud-name").innerText = `${player.name} (${player.class} SD)`;
+            updateScore(0);
+
+            // Reset Game Stats
+            score = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            currentStage = 1;
+            currentMcIndex = 0;
+
+            setScreen("gameplay");
+            startStageMC();
+        }
+
+        function updateScore(val) {
+            score = val;
+            document.getElementById("hud-score").innerText = score;
+        }
+
+        function showFeedback(isCorrect, title, desc, callback) {
+            if (isCorrect) {
+                soundCorrect();
+                document.getElementById("feedback-emoji").innerText = "🎉";
+                document.getElementById("feedback-title").innerText = title;
+                document.getElementById("feedback-title").className = "font-kids text-2xl font-bold text-emerald-600";
+            } else {
+                soundIncorrect();
+                document.getElementById("feedback-emoji").innerText = "😢";
+                document.getElementById("feedback-title").innerText = title;
+                document.getElementById("feedback-title").className = "font-kids text-2xl font-bold text-rose-600";
+            }
+            document.getElementById("feedback-desc").innerText = desc;
+            
+            const overlay = document.getElementById("game-feedback");
+            overlay.classList.remove("hidden");
+            
+            setTimeout(() => {
+                overlay.classList.add("hidden");
+                if (callback) callback();
+            }, 1800);
+        }
+
+        // --- TIMER UTILITIES ---
+        function startTimer(seconds, onTimeUpCallback) {
+            clearInterval(timerInterval);
+            timerVal = seconds;
+            document.getElementById("hud-timer-container").classList.remove("hidden");
+            document.getElementById("hud-timer").innerText = `${timerVal}s`;
+
+            timerInterval = setInterval(() => {
+                timerVal--;
+                document.getElementById("hud-timer").innerText = `${timerVal}s`;
+
+                if (timerVal <= 5) {
+                    document.getElementById("hud-timer-container").className = "bg-rose-500 text-white px-3 py-1 rounded-full font-bold animate-pulse";
+                } else {
+                    document.getElementById("hud-timer-container").className = "bg-rose-100 text-rose-800 px-3 py-1 rounded-full font-bold";
+                }
+
+                if (timerVal <= 0) {
+                    clearInterval(timerInterval);
+                    onTimeUpCallback();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // --- STAGE 1: MULTIPLE CHOICE ---
+        function startStageMC() {
+            currentStage = 1;
+            document.getElementById("game-mode-title").innerText = "Tantangan 1: Pilihan Ganda ❓";
+            document.getElementById("stage-mc").classList.remove("hidden");
+            document.getElementById("stage-matching").classList.add("hidden");
+            document.getElementById("stage-memory").classList.add("hidden");
+            loadMcQuestion();
+        }
+
+        function loadMcQuestion() {
+            if (currentMcIndex >= MC_QUESTIONS.length) {
+                stopTimer();
+                showFeedback(true, "Luar Biasa!", "Tantangan Pilihan Ganda selesai. Mari ke Tantangan Menjodohkan!", () => {
+                    startStageMatching();
+                });
+                return;
+            }
+
+            // Progress Bar
+            const percent = ((currentMcIndex) / (MC_QUESTIONS.length + 2)) * 100; // +2 for stage 2 and 3
+            document.getElementById("game-progress-bar").style.width = `${percent}%`;
+            document.getElementById("game-progress-text").innerText = `Soal ${currentMcIndex + 1}/${MC_QUESTIONS.length}`;
+
+            const qData = MC_QUESTIONS[currentMcIndex];
+            document.getElementById("mc-question").innerText = qData.q;
+            
+            const optionsContainer = document.getElementById("mc-options");
+            optionsContainer.innerHTML = "";
+
+            // Shuffle Options helper
+            const shuffledOptions = [...qData.opt].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.className = "w-full text-left p-4 rounded-2xl border-2 border-sky-100 hover:border-sky-400 bg-sky-50/50 hover:bg-sky-50 font-semibold text-gray-700 transition active:translate-y-0.5 focus:outline-none flex items-center gap-3";
+                btn.innerHTML = `<span class="bg-sky-400 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs">⭐</span> ${opt}`;
+                btn.onclick = () => checkMcAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Start 15s Timer per question
+            startTimer(15, () => {
+                incorrectAnswers++;
+                currentMcIndex++;
+                showFeedback(false, "Waktu Habis!", "Ayo berkonsentrasi lebih cepat lagi!", loadMcQuestion);
+            });
+        }
+
+        function checkMcAnswer(selectedOpt, btnElement) {
+            stopTimer();
+            const qData = MC_QUESTIONS[currentMcIndex];
+            const allBtns = document.querySelectorAll("#mc-options button");
+            
+            // Disable all buttons immediately
+            allBtns.forEach(b => b.removeAttribute("onclick"));
+
+            if (selectedOpt === qData.a) {
+                correctAnswers++;
+                updateScore(score + 10);
+                btnElement.classList.remove("border-sky-100", "bg-sky-50/50");
+                btnElement.classList.add("border-emerald-500", "bg-emerald-100");
+                
+                showFeedback(true, "Hebat sekali!", "Jawaban kamu tepat!", () => {
+                    currentMcIndex++;
+                    loadMcQuestion();
+                });
+            } else {
+                incorrectAnswers++;
+                btnElement.classList.remove("border-sky-100", "bg-sky-50/50");
+                btnElement.classList.add("border-rose-500", "bg-rose-100");
+
+                // Highlight correct answer
+                allBtns.forEach(b => {
+                    if (b.innerText.includes(qData.a)) {
+                        b.classList.add("border-emerald-400", "bg-emerald-50");
+                    }
+                });
+
+                showFeedback(false, "Kurang Tepat!", `Jawaban yang benar adalah: ${qData.a}`, () => {
+                    currentMcIndex++;
+                    loadMcQuestion();
+                });
+            }
+        }
+
+        // --- STAGE 2: MATCHING (MENJODOHKAN) ---
+        function startStageMatching() {
+            currentStage = 2;
+            matchingRound = 0;
+            document.getElementById("game-mode-title").innerText = "Tantangan 2: Menjodohkan Kata 🔗";
+            document.getElementById("stage-mc").classList.add("hidden");
+            document.getElementById("stage-matching").classList.remove("hidden");
+            document.getElementById("stage-memory").classList.add("hidden");
+
+            loadMatchingRound();
+        }
+
+        function loadMatchingRound() {
+            if (matchingRound >= MATCH_DATA.length) {
+                stopTimer();
+                showFeedback(true, "Tantangan Selesai!", "Hebat! Kamu berhasil menjodohkan semua kata. Sekarang, uji ingatanmu!", () => {
+                    startStageMemory();
+                });
+                return;
+            }
+
+            // HUD / Progress
+            const progressPercent = 75; // Approx stage 2
+            document.getElementById("game-progress-bar").style.width = `${progressPercent}%`;
+            document.getElementById("game-progress-text").innerText = `Bagian ${matchingRound + 1}/2`;
+
+            selectedLeft = null;
+            selectedRight = null;
+            matchedPairs = [];
+
+            const roundData = MATCH_DATA[matchingRound];
+            
+            // Shuffle Left items & Right items independently
+            const leftItems = roundData.map(d => d.left).sort(() => Math.random() - 0.5);
+            const rightItems = roundData.map(d => d.right).sort(() => Math.random() - 0.5);
+
+            const leftCol = document.getElementById("match-left");
+            const rightCol = document.getElementById("match-right");
+            leftCol.innerHTML = "";
+            rightCol.innerHTML = "";
+
+            leftItems.forEach(item => {
+                const div = document.createElement("div");
+                div.id = `left-${item}`;
+                div.className = "p-3 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-900 font-bold text-center cursor-pointer hover:bg-amber-100 transition duration-200 select-none text-sm shadow-sm";
+                div.innerText = item;
+                div.onclick = () => selectLeftItem(item);
+                leftCol.appendChild(div);
+            });
+
+            rightItems.forEach(item => {
+                const div = document.createElement("div");
+                div.id = `right-${item}`;
+                div.className = "p-3 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-900 font-bold text-center cursor-pointer hover:bg-amber-100 transition duration-200 select-none text-sm shadow-sm";
+                div.innerText = item;
+                div.onclick = () => selectRightItem(item);
+                rightCol.appendChild(div);
+            });
+
+            // Timer 60 seconds for Matching Stage
+            startTimer(60, () => {
+                // Time up
+                incorrectAnswers += (5 - matchedPairs.length);
+                matchingRound++;
+                showFeedback(false, "Waktu Habis!", "Ayo lanjut ke tantangan menjodohkan berikutnya!", loadMatchingRound);
+            });
+        }
+
+        function selectLeftItem(item) {
+            soundClick();
+            if (matchedPairs.some(p => p.left === item)) return; // Already matched
+
+            // Deselect previous
+            if (selectedLeft) {
+                document.getElementById(`left-${selectedLeft}`).className = "p-3 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-900 font-bold text-center cursor-pointer hover:bg-amber-100 transition duration-200 select-none text-sm shadow-sm";
+            }
+
+            selectedLeft = item;
+            document.getElementById(`left-${item}`).className = "p-3 rounded-2xl border-4 border-sky-400 bg-sky-100 text-sky-900 font-bold text-center cursor-pointer transition duration-200 select-none text-sm shadow-sm animate-pulse";
+
+            checkMatchingMatch();
+        }
+
+        function selectRightItem(item) {
+            soundClick();
+            if (matchedPairs.some(p => p.right === item)) return; // Already matched
+
+            // Deselect previous
+            if (selectedRight) {
+                document.getElementById(`right-${selectedRight}`).className = "p-3 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-900 font-bold text-center cursor-pointer hover:bg-amber-100 transition duration-200 select-none text-sm shadow-sm";
+            }
+
+            selectedRight = item;
+            document.getElementById(`right-${item}`).className = "p-3 rounded-2xl border-4 border-sky-400 bg-sky-100 text-sky-900 font-bold text-center cursor-pointer transition duration-200 select-none text-sm shadow-sm animate-pulse";
+
+            checkMatchingMatch();
+        }
+
+        function checkMatchingMatch() {
+            if (!selectedLeft || !selectedRight) return;
+
+            const roundData = MATCH_DATA[matchingRound];
+            // Find correct pair
+            const correctPair = roundData.find(d => d.left === selectedLeft && d.right === selectedRight);
+
+            const leftDiv = document.getElementById(`left-${selectedLeft}`);
+            const rightDiv = document.getElementById(`right-${selectedRight}`);
+
+            if (correctPair) {
+                // Correct match!
+                soundCorrect();
+                correctAnswers++;
+                updateScore(score + 10);
+                matchedPairs.push({ left: selectedLeft, right: selectedRight });
+
+                leftDiv.className = "p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-100 text-emerald-900 font-bold text-center pointer-events-none text-sm shadow-inner transition duration-300 scale-95 flex items-center justify-center gap-1";
+                leftDiv.innerHTML = `✅ ${selectedLeft}`;
+
+                rightDiv.className = "p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-100 text-emerald-900 font-bold text-center pointer-events-none text-sm shadow-inner transition duration-300 scale-95 flex items-center justify-center gap-1";
+                rightDiv.innerHTML = `${selectedRight} ✅`;
+
+                selectedLeft = null;
+                selectedRight = null;
+
+                // Check if all matched
+                if (matchedPairs.length === roundData.length) {
+                    stopTimer();
+                    setTimeout(() => {
+                        matchingRound++;
+                        loadMatchingRound();
+                    }, 1000);
+                }
+            } else {
+                // Mis-match
+                soundIncorrect();
+                incorrectAnswers++;
+                
+                leftDiv.className = "p-3 rounded-2xl border-4 border-rose-500 bg-rose-100 text-rose-950 font-bold text-center cursor-pointer transition duration-200 text-sm shadow-sm";
+                rightDiv.className = "p-3 rounded-2xl border-4 border-rose-500 bg-rose-100 text-rose-950 font-bold text-center cursor-pointer transition duration-200 text-sm shadow-sm";
+
+                setTimeout(() => {
+                    // Reset styling if still unselected/unmatched
+                    if (selectedLeft === leftDiv.id.replace("left-", "")) {
+                        leftDiv.className = "p-3 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-900 font-bold text-center cursor-pointer hover:bg-amber-100 transition duration-200 select-none text-sm shadow-sm";
+                    }
+                    if (selectedRight === rightDiv.id.replace("right-", "")) {
+                        rightDiv.className = "p-3 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-900 font-bold text-center cursor-pointer hover:bg-amber-100 transition duration-200 select-none text-sm shadow-sm";
+                    }
+                    selectedLeft = null;
+                    selectedRight = null;
+                }, 800);
+            }
+        }
+
+        // --- STAGE 3: MEMORY CARDS ---
+        function startStageMemory() {
+            currentStage = 3;
+            document.getElementById("game-mode-title").innerText = "Tantangan 3: Permainan Kartu Memori 🃏";
+            document.getElementById("stage-mc").classList.add("hidden");
+            document.getElementById("stage-matching").classList.add("hidden");
+            document.getElementById("stage-memory").classList.remove("hidden");
+
+            // Progress Bar
+            document.getElementById("game-progress-bar").style.width = `90%`;
+            document.getElementById("game-progress-text").innerText = `Kartu Memori`;
+
+            flippedCards = [];
+            matchedMemoryIds = [];
+
+            // Shuffle Cards
+            const shuffledCards = [...MEMORY_DATA].sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById("memory-grid");
+            grid.innerHTML = "";
+
+            shuffledCards.forEach((card, index) => {
+                const cardEl = document.createElement("div");
+                cardEl.className = "card-flip h-24 w-full cursor-pointer relative";
+                cardEl.id = `memcard-${index}`;
+
+                cardEl.innerHTML = `
+                    <div class="card-inner w-full h-full relative duration-500 shadow-md rounded-2xl">
+                        <!-- Card Front (Tutup) -->
+                        <div class="card-front bg-gradient-to-br from-violet-400 to-indigo-500 rounded-2xl flex items-center justify-center border-4 border-white">
+                            <span class="text-3xl text-white font-bold font-kids">?</span>
+                        </div>
+                        <!-- Card Back (Terbuka) -->
+                        <div class="card-back bg-white rounded-2xl flex items-center justify-center border-4 border-violet-400 p-2 text-center">
+                            <span class="text-xs md:text-sm font-bold text-indigo-900 leading-tight">${card.text}</span>
+                        </div>
+                    </div>
+                `;
+
+                cardEl.onclick = () => flipMemoryCard(index, card.matchId, cardEl);
+                grid.appendChild(cardEl);
+            });
+
+            // Timer 60 seconds
+            startTimer(60, () => {
+                // Time's up
+                incorrectAnswers += (5 - matchedMemoryIds.length);
+                endGame();
+            });
+        }
+
+        function flipMemoryCard(index, matchId, cardEl) {
+            const inner = cardEl.querySelector(".card-inner");
+            
+            // Guards
+            if (flippedCards.length >= 2) return;
+            if (inner.classList.contains("card-flipped")) return;
+            if (matchedMemoryIds.includes(matchId)) return;
+
+            soundClick();
+            inner.classList.add("card-flipped");
+            flippedCards.push({ index, matchId, element: cardEl });
+
+            if (flippedCards.length === 2) {
+                checkMemoryMatch();
+            }
+        }
+
+        function checkMemoryMatch() {
+            const [c1, c2] = flippedCards;
+
+            if (c1.matchId === c2.matchId) {
+                // Match!
+                soundCorrect();
+                correctAnswers += 2;
+                updateScore(score + 15); // +15 for card matches
+                matchedMemoryIds.push(c1.matchId);
+
+                // Add Green borders or success animation
+                setTimeout(() => {
+                    c1.element.querySelector(".card-back").className = "card-back bg-emerald-100 rounded-2xl flex flex-col items-center justify-center border-4 border-emerald-500 p-2 text-center scale-95 transition duration-300";
+                    c2.element.querySelector(".card-back").className = "card-back bg-emerald-100 rounded-2xl flex flex-col items-center justify-center border-4 border-emerald-500 p-2 text-center scale-95 transition duration-300";
+                    
+                    flippedCards = [];
+
+                    // Check if all matches completed
+                    if (matchedMemoryIds.length === 5) {
+                        stopTimer();
+                        setTimeout(() => {
+                            soundVictory();
+                            endGame();
+                        }, 800);
+                    }
+                }, 600);
+            } else {
+                // Failed match
+                soundIncorrect();
+                incorrectAnswers++;
+                setTimeout(() => {
+                    c1.element.querySelector(".card-inner").classList.remove("card-flipped");
+                    c2.element.querySelector(".card-inner").classList.remove("card-flipped");
+                    flippedCards = [];
+                }, 1200);
+            }
+        }
+
+        // --- END OF GAME & RESULTS ---
+        function endGame() {
+            stopTimer();
+            document.getElementById("hud-timer-container").classList.add("hidden");
+            setScreen("end");
+
+            // Predicate Determination
+            let predicate = "Terus Belajar 📚";
+            let colorClass = "text-rose-500";
+            if (score >= 180) {
+                predicate = "HEBAT ⭐⭐⭐";
+                colorClass = "text-amber-500";
+            } else if (score >= 140) {
+                predicate = "SANGAT BAIK ⭐⭐";
+                colorClass = "text-emerald-500";
+            } else if (score >= 90) {
+                predicate = "BAIK ⭐";
+                colorClass = "text-sky-500";
+            }
+
+            // Bind values
+            document.getElementById("end-score").innerText = score;
+            document.getElementById("end-correct").innerText = correctAnswers;
+            document.getElementById("end-incorrect").innerText = incorrectAnswers;
+            
+            const predEl = document.getElementById("end-predicate");
+            predEl.innerText = predicate;
+            predEl.className = `font-kids text-2xl font-bold ${colorClass}`;
+
+            document.getElementById("end-name").innerText = player.name;
+            document.getElementById("end-class").innerText = player.class;
+            document.getElementById("end-school").innerText = player.school;
+
+            // Progress bar fully full
+            document.getElementById("game-progress-bar").style.width = "100%";
+            document.getElementById("game-progress-text").innerText = "Petualangan Selesai!";
+        }
+
+        function restartGame() {
+            soundClick();
+            setScreen("start");
+        }
+
+        // --- CERTIFICATE PRINTING ---
+        function printCertificate() {
+            soundClick();
+            // Fill Certificate fields
+            document.getElementById("cert-name").innerText = player.name;
+            document.getElementById("cert-class").innerText = `Kelas ${player.class} SD`;
+            document.getElementById("cert-school").innerText = player.school;
+            document.getElementById("cert-score").innerText = score;
+            
+            // Clean Emoji suffix for formal certificate
+            let rawPredicate = document.getElementById("end-predicate").innerText;
+            document.getElementById("cert-predicate").innerText = rawPredicate.replace(/[⭐📚]/g, '').trim();
+
+            // Display print area and trigger window print
+            const certArea = document.getElementById("certificate-print-area");
+            certArea.classList.remove("hidden");
+            window.print();
+            
+            // Hide after print dialogue closes
+            setTimeout(() => {
+                certArea.classList.add("hidden");
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
